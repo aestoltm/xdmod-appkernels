@@ -78,20 +78,22 @@ class HighChartAppKernel extends HighChart2
         $showMinMax = false,
         $contextMenuOnClick = null
     ) {
-        $this->_chart['title']['style'] = array(
+        $this->_chart['layout']['titlefont'] = array(
             'color'=> '#000000',
-            'fontSize' => (16 + $font_size).'px'
+            'size' => (16 + $font_size).'px'
         );
-        $this->_chart['subtitle']['style'] = array(
+        $this->_chart['layout']['annotations'][1]['font'] = array(
             'color'=> '#5078a0',
-            'fontSize' => (12 + $font_size).'px'
+            'size' => (12 + $font_size).'px'
         );
-        $this->_chart['subtitle']['y'] = 30 + $font_size;
-        $this->_chart['legend']['itemStyle'] = array(
+        $this->_chart['layout']['annotations'][1]['y'] = 30 + $font_size; // Confirm placment is correct
+        $this->_chart['layout']['legend']['font'] = array(
             'color' => '#274b6d',
-            'fontWeight' => 'normal',
-            'fontSize' => (12  + $font_size).'px'
+            'size' => (12  + $font_size).'px'
         );
+
+        // Need to check but shared tooltip is address in Plotly2.php.
+        // Need to look into cursor types, have only found hackish solutions so far.
         $tooltipConfig = array(
             'xDateFormat' => '%Y/%m/%d %H:%M:%S',
             'shared' => true,
@@ -99,9 +101,7 @@ class HighChartAppKernel extends HighChart2
         );
         $this->_chart['tooltip'] = $tooltipConfig;
 
-        $this->_chart['legend']['wordWrap'] = false;
-
-        $this->_chart['xAxis'] = array(
+        $this->_chart['layout']['xaxis'] = array(
             // min and max of datetime xAxis in milliseconds from 1970-01-01
             'type' => 'datetime',
             'min' => strtotime($this->_startDate)*1000,
@@ -160,30 +160,23 @@ class HighChartAppKernel extends HighChart2
                 $yAxisColorValue = $colors[$this->_axisCount % 33];
                 $yAxisColor = '#'.str_pad(dechex($yAxisColorValue), 6, '0', STR_PAD_LEFT);
                 $yAxis = array(
-                    'title' => array(
-                         'text' => $dataset->metricUnit,
-                        'style' => array(
-                            'color'=> $yAxisColor,
-                            'fontWeight' => 'bold',
-                            'fontSize' => (12 + $font_size).'px'
-                        )
+                    'title' => '<b>' . $dataset->metricUnit . '</b>',
+                    'titlefont' => array(
+                        'color'=> $yAxisColor,
+                        'size' => (12 + $font_size).'px'
                     ),
-                    'labels' => array(
-                        'style' => array(
-                            'fontSize' => (11 + $font_size).'px'
-                        ),
-                        'decimals' => 2
+                    'tickfont' => array(
+                        'fontSize' => (11 + $font_size).'px',
                     ),
-                    'opposite' => $this->_axisCount % 2 == 1,
-                    'min' => false?null:$yMin,
-                                        'max' => false?null:$yMax,
-                    'type' => false? 'logarithmic' : 'linear',
-                    'showLastLabel' => true,
-                    'endOnTick' => true,
+                    'tickformat' => '.2f',
+                    'opposite' => $this->_axisCount % 2 == 1, //Add support
+                    'range' => [$yMin, $yMax],
+                    'type' => false ? 'logarithmic' : 'linear',
+                    'showLastLabel' => true, //Add support
+                    'endOnTick' => true, //Add support
                     'index' => $this->_axisCount,
-                    'lineWidth' => 1 + $font_size/4,
-                    'allowDecimals' => true,
-                    'tickInterval' => false ? 1  :null
+                    'linewidth' => 1 + $font_size/4,
+                    'tickInterval' => false ? 1  :null //since this is default value will need to cross reference vs Plotlys default
                 );
                 $this->_axis[$dataset->metricUnit] = $yAxis;
                                 $this->_axis_index[$dataset->metricUnit]=count($this->_chart['yAxis']);
